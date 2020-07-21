@@ -933,6 +933,7 @@ class ImageTests(object):
         drawing_element = _create_inline_image(
             blip=_embedded_blip(self.IMAGE_RELATIONSHIP_ID),
             description="It's a hat",
+            extent=(9525, 19000)
         )
 
         image = self._read_embedded_image(drawing_element)
@@ -940,6 +941,7 @@ class ImageTests(object):
         assert_equal(documents.Image, type(image))
         assert_equal("It's a hat", image.alt_text)
         assert_equal("image/png", image.content_type)
+        assert_equal(documents.Size(width=1, height=2), image.size)
         with image.open() as image_file:
             assert_equal(self.IMAGE_BYTES, image_file.read())
 
@@ -1229,9 +1231,9 @@ def _text_element(value):
     return xml_element("w:t", {}, [xml_text(value)])
 
 
-def _create_inline_image(blip, description=None, title=None):
+def _create_inline_image(blip, description=None, title=None, extent=None):
     return xml_element("w:drawing", {}, [
-        xml_element("wp:inline", {}, _create_image_elements(blip, description=description, title=title))
+        xml_element("wp:inline", {}, _create_image_elements(blip, description=description, title=title, extent=extent))
     ])
 
 
@@ -1241,15 +1243,19 @@ def _create_anchored_image(description, blip):
     ])
 
 
-def _create_image_elements(blip, description=None, title=None):
+def _create_image_elements(blip, description=None, title=None, extent=None):
     properties = {}
     if description is not None:
         properties["descr"] = description
     if title is not None:
         properties["title"] = title
-
+    extent = {
+        "cx": extent[0] if extent else "0",
+        "cy": extent[1] if extent else "0"
+    }
     return [
         xml_element("wp:docPr", properties),
+        xml_element("wp:extent", extent),
         xml_element("a:graphic", {}, [
             xml_element("a:graphicData", {}, [
                 xml_element("pic:pic", {}, [
