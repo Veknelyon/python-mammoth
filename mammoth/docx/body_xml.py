@@ -10,7 +10,7 @@ from .xmlparser import node_types, XmlElement
 from .styles_xml import Styles
 from .uris import replace_fragment, uri_to_zip_entry_name
 
-EMU_TO_PIXEL = 1 / 9525
+EMU_PER_PIXEL = 9525
 PT_TO_PX = 4.0 / 3
 
 if sys.version_info >= (3, ):
@@ -405,7 +405,7 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
         return _read_blips(blips, alt_text, size)
 
     def _emu_to_pixel(emu):
-        return round(int(emu) * EMU_TO_PIXEL)
+        return int(round(float(emu) / EMU_PER_PIXEL))
 
     def _read_blips(blips, alt_text, size):
         return _ReadResult.concat(lists.map(lambda blip: _read_blip(blip, alt_text, size), blips))
@@ -475,7 +475,7 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
 
     def _extract_size_from_style(style_name, style):
         with_column = "{}:".format(style_name)
-        raw_size = next(filter(lambda s: s.startswith(with_column), style))
+        raw_size = next(iter(filter(lambda s: s.startswith(with_column), style)))
         return _pt_to_pixel(raw_size.replace(with_column, ""))
 
     def _pt_to_pixel(point):
