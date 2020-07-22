@@ -12,6 +12,7 @@ from .uris import replace_fragment, uri_to_zip_entry_name
 
 EMU_PER_PIXEL = 9525
 PT_TO_PX = 4.0 / 3
+IN_TO_PX = 72.0
 
 if sys.version_info >= (3, ):
     unichr = chr
@@ -476,10 +477,13 @@ def _create_reader(numbering, content_types, relationships, styles, docx_file, f
     def _extract_size_from_style(style_name, style):
         with_column = "{}:".format(style_name)
         raw_size = next(iter(filter(lambda s: s.startswith(with_column), style)))
-        return _pt_to_pixel(raw_size.replace(with_column, ""))
+        return _to_pixel(raw_size.replace(with_column, ""))
 
-    def _pt_to_pixel(point):
-        return round(float(point.replace("pt", "")) * PT_TO_PX)
+    def _to_pixel(value):
+        if value.endswith("pt"):
+            return round(float(value.replace("pt", "")) * PT_TO_PX)
+        else:
+            return round(float(value.replace("in", "")) * IN_TO_PX)
 
     def read_imagedata(element, style=None):
         relationship_id = element.attributes.get("r:id")

@@ -958,6 +958,20 @@ class ImageTests(object):
         assert_equal(documents.Size(width=42, height=51), image.size)
 
     @istest
+    def can_read_shape_elements_with_inch_size_attributes(self):
+        shape_element = xml_element("v:shape", {"style": "width:0.58in;height:0.708in"}, [
+            xml_element("v:imagedata", {
+                "r:id": self.IMAGE_RELATIONSHIP_ID,
+                "o:title": "It's a hat"
+            })
+        ])
+
+        image = self._read_embedded_image(shape_element)
+
+        assert_equal(documents.Image, type(image))
+        assert_equal(documents.Size(width=42, height=51), image.size)
+
+    @istest
     def when_imagedata_element_has_no_relationship_id_then_it_is_ignored_with_warning(self):
         imagedata_element = xml_element("v:imagedata")
 
